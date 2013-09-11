@@ -1,0 +1,24 @@
+{
+  "name": "sky",
+  "version": "0.1.0",
+  "description": "A JavaScript library for visualizing celestial objects",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/xiw/sky.git"
+  },
+  "author": "Xi Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xiw/sky/issues"
+  },
+  "dependencies": {
+    "d3": "~3",
+    "optimist": "~0.6.0",
+    "topojson": "~1"
+  },
+  "devDependencies": {
+    "jshint": ">=2.1.10",
+    "nodeunit": ">=0.8.1",
+    "uglify-js": "~2.4.0"
+  }
+}

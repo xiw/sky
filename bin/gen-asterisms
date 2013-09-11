@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var d3 = require("d3"),
+    fs = require("fs"),
+    optimist = require("optimist"),
+    sky = require("..");
+
+var dir;
+var argv = optimist.string("o")
+  .demand("bsc5p")
+  .check(function(argv) {
+    if (!argv._.length)
+      throw "asterisms directory required";
+    dir = argv._[0];
+    if (!fs.statSync(dir).isDirectory())
+      throw dir + " - not a directory";
+  })
+  .argv
+  ;
+
+// Build name map.
+var map = d3.map();
+var chunk = fs.readFileSync(argv.bsc5p).toString();
+var stars = sky.bsc5p.parse(chunk);
+stars.features.forEach(function(_) {
+  map.set(_.id, _.geometry.coordinates);
+});
+
+var connectedStarIDs = d3.set();
+var wrapper_map = {
+  get: function(k) {
+    connectedStarIDs.add(k);
+    return map.get(k);
+  }
+};
+
+var parser = sky.asterism(wrapper_map);
+fs.readdirSync(dir).forEach(function(filename) {
+  var chunk = fs.readFileSync(dir + "/" + filename).toString();
+  parser.rows(filename, chunk);
+});
+
+var outStars = argv["out-stars"];
+if (outStars !== undefined) {
+  stars.features = stars.features.filter(function(_) {
+    return connectedStarIDs.has(_.id); 
+  });
+  fs.writeFileSync(outStars, JSON.stringify(stars, null, 2));
+  console.warn("stars: " + stars.features.length);
+}
+
+var json = parser.json();
+var asterisms = JSON.stringify(json, null, 2);
+if (argv.o !== undefined)
+  fs.writeFileSync(argv.o, asterisms);
+else
+  console.log(asterisms);
+console.warn("asterisms: " + json.features.length);

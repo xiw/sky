@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+
+// TopoJSON generates an incorrect topology for UMi that covers
+// most of the sphere.  To fix it, reverse the coordinates.
+
+var d3 = require("d3");
+var fs = require("fs");
+
+var file = process.argv[2];
+var object = JSON.parse(fs.readFileSync(file));
+
+object.features.forEach(function(c) {
+  if (c.geometry.type !== "Polygon")
+    return;
+  var coords = c.geometry.coordinates[0];
+  var area = d3.geo.area(c);
+  // If the area of the reversed polygon is smaller, use that one.
+  // For now, this happens to UMi only.
+  coords.reverse();
+  if (area > d3.geo.area(c)) {
+    console.warn("reverse: " + c.id);
+    return;
+  }
+  coords.reverse();
+});
+
+fs.writeFileSync(file, JSON.stringify(object));

@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+
+var path = __dirname + "/../package.json";
+var json = require(path);
+console.log(json.version);

@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+var fs = require("fs"),
+    optimist = require("optimist"),
+    readline = require("readline"),
+    sky = require("..");
+
+var argv = optimist.string("o").argv;
+
+var input = process.stdin,
+    output = process.stdout;
+
+if (argv._.length)
+  input = fs.createReadStream(argv._[0]);
+if (argv.o !== undefined)
+  output = fs.createWriteStream(argv.o);
+
+var rl = readline.createInterface({
+  input: input,
+  output: output,
+  terminal: false
+});
+
+var parser = sky.bnd20();
+
+rl.on("line", parser.row)
+  .on("close", function() {
+    var json = parser.json();
+    output.write(JSON.stringify(json, null, 2));
+    console.warn("constellations: " + json.features.length);
+  });
